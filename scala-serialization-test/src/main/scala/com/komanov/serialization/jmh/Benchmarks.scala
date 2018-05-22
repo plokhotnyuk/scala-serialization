@@ -10,9 +10,9 @@ import org.openjdk.jmh.annotations._
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Fork(value = 1, jvmArgs = Array("-Xmx2G"))
-@Threads(2)
-@Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Warmup(iterations = 2, time = 5, timeUnit = TimeUnit.SECONDS)
+@Threads(1)
+@Measurement(iterations = 1, time = 1, timeUnit = TimeUnit.MICROSECONDS)
+@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.MICROSECONDS)
 abstract class BenchmarkBase(converter: MyConverter) {
 
   private val site1k = TestData.site1k
@@ -27,6 +27,12 @@ abstract class BenchmarkBase(converter: MyConverter) {
   private val site8kBytes = converter.toByteArray(site8k)
   private val site64kBytes = converter.toByteArray(site64k)
 
+  println(s"site1k: ${site1kBytes.length}")
+  println(s"site2k: ${site2kBytes.length}")
+  println(s"site4k: ${site4kBytes.length}")
+  println(s"site8k: ${site8kBytes.length}")
+  println(s"site64k: ${site64kBytes.length}")
+
   private val events1kInput = createEventsInput(site1k)
   private val events2kInput = createEventsInput(site2k)
   private val events4kInput = createEventsInput(site4k)
@@ -39,6 +45,15 @@ abstract class BenchmarkBase(converter: MyConverter) {
   private val events8kOutput = createEventsOutput(site8k)
   private val events64kOutput = createEventsOutput(site64k)
 
+  println(s"events1k: ${events1kOutput.map(_._2.length).sum}")
+  println(s"events2k: ${events2kOutput.map(_._2.length).sum}")
+  println(s"events4k: ${events4kOutput.map(_._2.length).sum}")
+  println(s"events8k: ${events8kOutput.map(_._2.length).sum}")
+  println(s"events64k: ${events64kOutput.map(_._2.length).sum}")
+
+  @Benchmark
+  def no_op(): Unit = ()
+/*
   @Benchmark
   def serialization_site_1k(): Array[Byte] = {
     converter.toByteArray(site1k)
@@ -217,7 +232,7 @@ abstract class BenchmarkBase(converter: MyConverter) {
     for (e <- events64kInput) {
       converter.siteEventFromByteArray(e.getClass, converter.toByteArray(e))
     }
-  }
+  }*/
 
   private def createEventsInput(site: Site): Seq[SiteEvent] = {
     EventProcessor.unapply(site).map(_.event)
